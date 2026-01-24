@@ -335,7 +335,7 @@ paste0("Since ", status_one_sample_t_test$p.value ," < 0.05 we conclude that Sta
 
 print("Scatterplot for visualisation:")
 # persist plot for additional information
-svg("gei_graduates_attainment_scatterplot.svg", width = 8, height = 8)
+svg("gei_graduates_attainment_scatterplot.svg", width = 12, height = 8)
 
 plot(gei_data$`Graduates of tertiary education (%)`, gei_data$`Attainment and participation`,
      xlab = "Graduates of tertiary education (%)",
