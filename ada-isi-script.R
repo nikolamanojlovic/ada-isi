@@ -284,8 +284,8 @@ print("Testing if data is normally distributed with KS test for indicator Social
 print("H0: Social activities indicator has ND")
 print("H1: Social activities indicator doesn't have ND")
 
-# SKIP - all data is 1 for health, do test on all
-#gei_data$HealthCategorical <- factor(gei_data$Health, levels = c(1, 2, 3), labels = group_count_labels)
+# SKIP - all data is High for health, do test on all
+# gei_data$HealthCategorical <- factor(gei_data$Health, levels = c(1, 2, 3), labels = group_count_labels)
 
 social_activities_ks_test <- 
   ks.test(na.omit(gei_data$`Social activities`), "pnorm",
@@ -296,9 +296,7 @@ print("Results of testing if data is normally distributed with KS test for indic
 print(social_activities_ks_test)
 paste0("Since ", social_activities_ks_test$p.value ," > 0.05 we conclude that Social activities indicator is normally distributed.")
 
-#
-# SKIP -NO DATA
-#
+# Missing data, further testing cannot be done
 
 #
 # Is the mean value of the indicator Status on the population 87?
