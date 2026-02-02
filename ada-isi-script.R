@@ -5,11 +5,13 @@ options(repos = c(CRAN = "https://cloud.r-project.org"))
 install.packages("readxl")
 install.packages("dplyr")
 install.packages("tidyr")
+install.packages("nortest") # to replace ks test as it is not correct
 
 # activate library for usage
 library(readxl)
 library(dplyr)
 library(tidyr)
+library(nortest)
 
 # reading excel data
 gei_data <- read_excel("Gender Equality Index.xlsx", col_names = TRUE)
@@ -149,28 +151,29 @@ print("Testing if data is normally distributed with KS test for indicator Access
 print("H0: Access indicator has ND")
 print("H1: Access indicator doesn't have ND")
 
-access_indicator_ks_test <- 
-  ks.test(na.omit(gei_data$Access), "pnorm",
-          mean = mean(gei_data$Access, na.rm = TRUE),
-          sd = sd(gei_data$Access, na.rm = TRUE))
+# access_indicator_ks_test <- 
+#   ks.test(na.omit(gei_data$Access), "pnorm",
+#           mean = mean(gei_data$Access, na.rm = TRUE),
+#           sd = sd(gei_data$Access, na.rm = TRUE))
+
+access_indicator_ks_test <- lillie.test(na.omit(gei_data$Access))
 
 print("Results of testing if data is normally distributed with KS test for indicator Access")
 print(access_indicator_ks_test)
-paste0("Since ", access_indicator_ks_test$p.value ," > 0.05 we conclude that Access indicator is normally distributed.")
+paste0("Since ", access_indicator_ks_test$p.value ," < 0.05 we conclude that Access indicator is not normally distributed.")
 
-print("Testing if there is statistical difference with ANOVA test for indicator Access for groups based on Time")
-print("H0: m(low) = m(medium) = m(high)")
-print("H1: at least 2 means differ")
+print("Testing if samples are from same population with Kruskal Wallis test for indicator Access for groups based on Time")
+print("H0: Samples are from the same population")
+print("H1: Samples are not from the same population")
 
 # make time categorical variable
 gei_data$TimeCategorical <- factor(gei_data$Time, levels = c(1, 2, 3), labels = group_count_labels)
 
-access_indicator_anova_test <- aov(Access ~ TimeCategorical, data = gei_data)
+access_indicator_kruskal_test <- kruskal.test(Access ~ TimeCategorical, data = gei_data)
 
-print("Results of testing if there is statistical difference with ANOVA test for indicator Access for groups based on Time")
-access_indicator_anova_summary = summary(access_indicator_anova_test)
-print(access_indicator_anova_summary)
-paste0("Since ", access_indicator_anova_summary[[1]][["Pr(>F)"]][1] ," > 0.05 we conclude that Access groups based on Time don't have statistical differences.")
+print("Results of testing if samples are from same population with Kruskal Wallis test for indicator Access for groups based on Time")
+print(access_indicator_kruskal_test)
+paste0("Since ", access_indicator_kruskal_test$p.value ," < 0.05 we conclude that Access groups based on Time are not from the same population.")
 
 #
 # Is there difference in the values of the indicator Share of members of regional assemblies (%) between countries which have medium and high Money?
@@ -184,10 +187,12 @@ gei_data$MoneyCategorical <- factor(gei_data$Money, levels = c(1, 2, 3), labels 
 
 gei_data_share_of_members_subset <- gei_data[gei_data$MoneyCategorical %in% c("High", "Medium"),]
 
-share_of_members_indicator_ks_test <- 
-  ks.test(na.omit(gei_data_share_of_members_subset$`Share of members of regional assemblies (%)`), "pnorm",
-          mean = mean(gei_data_share_of_members_subset$`Share of members of regional assemblies (%)`, na.rm = TRUE),
-          sd = sd(gei_data_share_of_members_subset$`Share of members of regional assemblies (%)`, na.rm = TRUE))
+# share_of_members_indicator_ks_test <- 
+#   ks.test(na.omit(gei_data_share_of_members_subset$`Share of members of regional assemblies (%)`), "pnorm",
+#           mean = mean(gei_data_share_of_members_subset$`Share of members of regional assemblies (%)`, na.rm = TRUE),
+#           sd = sd(gei_data_share_of_members_subset$`Share of members of regional assemblies (%)`, na.rm = TRUE))
+
+share_of_members_indicator_ks_test <- lillie.test(na.omit(gei_data_share_of_members_subset$`Share of members of regional assemblies (%)`))
 
 print("Results of testing if data is normally distributed with KS test for indicator Share of members of regional assemblies (%)")
 print(share_of_members_indicator_ks_test)
@@ -216,19 +221,23 @@ print("Testing if data is normally distributed with KS test for indicators Polit
 print("H0: Political/Economic indicator has ND")
 print("H1: Political/Economic indicator doesn't have ND")
 
-political_indicator_ks_test <- 
-  ks.test(na.omit(gei_data$Political), "pnorm",
-          mean = mean(gei_data$Political, na.rm = TRUE),
-          sd = sd(gei_data$Political, na.rm = TRUE))
+# political_indicator_ks_test <- 
+#   ks.test(na.omit(gei_data$Political), "pnorm",
+#          mean = mean(gei_data$Political, na.rm = TRUE),
+#           sd = sd(gei_data$Political, na.rm = TRUE))
+
+political_indicator_ks_test <- lillie.test(na.omit(gei_data$Political))
 
 print("Results of testing if data is normally distributed with KS test for indicator Political")
 print(political_indicator_ks_test)
 paste0("Since ", political_indicator_ks_test$p.value ," > 0.05 we conclude that Political indicator is normally distributed.")
 
-economic_indicator_ks_test <- 
-  ks.test(na.omit(gei_data$Economic), "pnorm",
-          mean = mean(gei_data$Economic, na.rm = TRUE),
-          sd = sd(gei_data$Economic, na.rm = TRUE))
+# economic_indicator_ks_test <- 
+#   ks.test(na.omit(gei_data$Economic), "pnorm",
+#           mean = mean(gei_data$Economic, na.rm = TRUE),
+#           sd = sd(gei_data$Economic, na.rm = TRUE))
+
+economic_indicator_ks_test <- lillie.test(na.omit(gei_data$Economic))
 
 print("Results of testing if data is normally distributed with KS test for indicator Economic")
 print(economic_indicator_ks_test)
@@ -287,10 +296,12 @@ print("H1: Social activities indicator doesn't have ND")
 # SKIP - all data is High for health, do test on all
 # gei_data$HealthCategorical <- factor(gei_data$Health, levels = c(1, 2, 3), labels = group_count_labels)
 
-social_activities_ks_test <- 
-  ks.test(na.omit(gei_data$`Social activities`), "pnorm",
-          mean = mean(gei_data$`Social activities`, na.rm = TRUE),
-          sd = sd(gei_data$`Social activities`, na.rm = TRUE))
+# social_activities_ks_test <- 
+#  ks.test(na.omit(gei_data$`Social activities`), "pnorm",
+#          mean = mean(gei_data$`Social activities`, na.rm = TRUE),
+#          sd = sd(gei_data$`Social activities`, na.rm = TRUE))
+
+social_activities_ks_test <- lillie.test(na.omit(gei_data$`Social activities`))
 
 print("Results of testing if data is normally distributed with KS test for indicator Social activities")
 print(social_activities_ks_test)
@@ -306,10 +317,12 @@ print("Testing if data is normally distributed with KS test for indicator Status
 print("H0: Status indicator has ND")
 print("H1: Status indicator doesn't have ND")
 
-status_ks_test <- 
-  ks.test(na.omit(gei_data$Status), "pnorm",
-          mean = mean(gei_data$Status, na.rm = TRUE),
-          sd = sd(gei_data$Status, na.rm = TRUE))
+# status_ks_test <- 
+#  ks.test(na.omit(gei_data$Status), "pnorm",
+#          mean = mean(gei_data$Status, na.rm = TRUE),
+#          sd = sd(gei_data$Status, na.rm = TRUE))
+
+status_ks_test <- lillie.test(na.omit(gei_data$Status))
 
 print("Results of testing if data is normally distributed with KS test for indicator Status")
 print(status_ks_test)
@@ -370,10 +383,12 @@ print("Testing if data is normally distributed with KS test for indicator Social
 print("H0: Social Activities indicator has ND")
 print("H1: Social Activities indicator doesn't have ND")
 
-social_activities_ks_test <- 
-  ks.test(na.omit(gei_data$`Social activities`), "pnorm",
-          mean = mean(gei_data$`Social activities`, na.rm = TRUE),
-          sd = sd(gei_data$`Social activities`, na.rm = TRUE))
+# social_activities_ks_test <- 
+#  ks.test(na.omit(gei_data$`Social activities`), "pnorm",
+#          mean = mean(gei_data$`Social activities`, na.rm = TRUE),
+#          sd = sd(gei_data$`Social activities`, na.rm = TRUE))
+
+status_ks_test <- lillie.test(na.omit(gei_data$`Social activities`))
 
 print("Results of testing if data is normally distributed with KS test for indicator Social activities")
 print(social_activities_ks_test)
